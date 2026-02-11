@@ -1,0 +1,20 @@
+/**
+ * Main Entry Point
+ * Exports vision client and MCP bridge
+ */
+export { ZaiVisionClient, ZaiAnalysisResult } from './shared/vision-client';
+export { MCPBridge } from './shared/mcp-bridge';
+// Export for use in platforms
+export * from './shared/vision-client';
+export * from './shared/mcp-bridge';
+// Re-export for specific platforms
+if (process.env.CLAUDE_ENV === 'cursor') {
+    // Cursor: Use MCP bridge
+    export * from './shared/mcp-bridge';
+}
+if (process.env.JETBRAINS_ENV === 'sublime') {
+    // Sublime: Use direct API client
+    export * from './shared/vision-client';
+}
+console.log('Z.ai Vision Suite loaded');
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiaW5kZXguanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi9zcmMvaW5kZXgudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IkFBQUE7OztHQUdHO0FBRUgsT0FBTyxFQUFFLGVBQWUsRUFBRSxpQkFBaUIsRUFBRSxNQUFNLHdCQUF3QixDQUFDO0FBQzVFLE9BQU8sRUFBRSxTQUFTLEVBQUUsTUFBTSxxQkFBcUIsQ0FBQztBQUVoRCw4QkFBOEI7QUFDOUIsY0FBYyx3QkFBd0IsQ0FBQztBQUN2QyxjQUFjLHFCQUFxQixDQUFDO0FBRXBDLG1DQUFtQztBQUNuQyxJQUFJLE9BQU8sQ0FBQyxHQUFHLENBQUMsVUFBVSxLQUFLLFFBQVEsRUFBRSxDQUFDO0lBQ3hDLHlCQUF5QjtJQUN6QixjQUFjLHFCQUFxQixDQUFDO0FBQ3RDLENBQUM7QUFFRCxJQUFJLE9BQU8sQ0FBQyxHQUFHLENBQUMsYUFBYSxLQUFLLFNBQVMsRUFBRSxDQUFDO0lBQzVDLGlDQUFpQztJQUNqQyxjQUFjLHdCQUF3QixDQUFDO0FBQ3pDLENBQUM7QUFFRCxPQUFPLENBQUMsR0FBRyxDQUFDLDBCQUEwQixDQUFDLENBQUMiLCJzb3VyY2VzQ29udGVudCI6WyIvKipcbiAqIE1haW4gRW50cnkgUG9pbnRcbiAqIEV4cG9ydHMgdmlzaW9uIGNsaWVudCBhbmQgTUNQIGJyaWRnZVxuICovXG5cbmV4cG9ydCB7IFphaVZpc2lvbkNsaWVudCwgWmFpQW5hbHlzaXNSZXN1bHQgfSBmcm9tICcuL3NoYXJlZC92aXNpb24tY2xpZW50JztcbmV4cG9ydCB7IE1DUEJyaWRnZSB9IGZyb20gJy4vc2hhcmVkL21jcC1icmlkZ2UnO1xuXG4vLyBFeHBvcnQgZm9yIHVzZSBpbiBwbGF0Zm9ybXNcbmV4cG9ydCAqIGZyb20gJy4vc2hhcmVkL3Zpc2lvbi1jbGllbnQnO1xuZXhwb3J0ICogZnJvbSAnLi9zaGFyZWQvbWNwLWJyaWRnZSc7XG5cbi8vIFJlLWV4cG9ydCBmb3Igc3BlY2lmaWMgcGxhdGZvcm1zXG5pZiAocHJvY2Vzcy5lbnYuQ0xBVURFX0VOViA9PT0gJ2N1cnNvcicpIHtcbiAgLy8gQ3Vyc29yOiBVc2UgTUNQIGJyaWRnZVxuICBleHBvcnQgKiBmcm9tICcuL3NoYXJlZC9tY3AtYnJpZGdlJztcbn1cblxuaWYgKHByb2Nlc3MuZW52LkpFVEJSQUlOU19FTlYgPT09ICdzdWJsaW1lJykge1xuICAvLyBTdWJsaW1lOiBVc2UgZGlyZWN0IEFQSSBjbGllbnRcbiAgZXhwb3J0ICogZnJvbSAnLi9zaGFyZWQvdmlzaW9uLWNsaWVudCc7XG59XG5cbmNvbnNvbGUubG9nKCdaLmFpIFZpc2lvbiBTdWl0ZSBsb2FkZWQnKTtcbiJdfQ==
