@@ -13,7 +13,8 @@
   ],
   "scripts": {
     "build": "tsc",
-    "dev": "tsc --watch"
+    "dev": "tsc --watch",
+    "test": "vitest ../../tests/vision.test.ts"
   },
   "dependencies": {
     "zai-vision-suite": "workspace:*"
