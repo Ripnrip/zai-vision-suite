@@ -213,21 +213,48 @@ vision-chat photo.jpg "Describe the mood of this image"
 
 A beautiful web interface is included for interactive use.
 
-### Running with Gradio
+### Running Locally
+
+#### Gradio App
 
 ```bash
 cd webapp
 pip install -r requirements.txt
 python app.py
+# Opens at http://localhost:7860
 ```
 
-### Running with Streamlit
+#### Streamlit App
 
 ```bash
 cd webapp
 pip install -r requirements.txt
 streamlit run app_streamlit.py
+# Opens at http://localhost:8501
 ```
+
+### Deploy to Free Hosting (Recommended)
+
+#### Hugging Face Spaces (Free - Recommended)
+
+The easiest way to deploy - supports both Gradio and Streamlit natively!
+
+1. Go to [huggingface.co/spaces](https://huggingface.co/spaces) and click **"Create new Space"**
+2. Choose **Gradio** or **Streamlit** as SDK
+3. Upload the files from `webapp/` directory
+4. Add your `ZAI_API_KEY` as a secret in Settings (or let users enter via UI)
+5. Your app will be live at: `https://huggingface.co/spaces/YOUR_USERNAME/zai-vision-suite`
+
+See [webapp/README.md](webapp/README.md) for detailed deployment instructions.
+
+#### Other Free Options
+
+| Platform | Gradio | Streamlit | Link |
+|----------|--------|-----------|------|
+| **Hugging Face Spaces** | ✅ | ✅ | [huggingface.co/spaces](https://huggingface.co/spaces) |
+| **Streamlit Cloud** | ❌ | ✅ | [streamlit.io/cloud](https://streamlit.io/cloud) |
+| **Render** | ✅ | ❌ | [render.com](https://render.com) |
+| **Railway** | ✅ | ✅ | [railway.app](https://railway.app) |
 
 The web app includes:
 - **Image Analysis Tab**: Upload images for detailed visual analysis

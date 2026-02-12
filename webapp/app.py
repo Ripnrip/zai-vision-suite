@@ -455,10 +455,14 @@ if __name__ == "__main__":
         print("Users can enter their API key via the web UI.")
         print("")
 
+    # Get port from environment (for Hugging Face Spaces compatibility)
+    server_port = int(os.environ.get('GRADIO_SERVER_PORT', os.environ.get('PORT', 7860)))
+    server_name = os.environ.get('GRADIO_SERVER_NAME', '0.0.0.0')
+
     # Launch Gradio app
     app.launch(
-        server_name="0.0.0.0",
-        server_port=7860,
+        server_name=server_name,
+        server_port=server_port,
         share=False,
         show_error=True,
         quiet=False,
