@@ -8,6 +8,9 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue.svg)](https://www.typescriptlang.org/)
 
+[![Gradio Demo](https://img.shields.io/badge/🎨-Try%20Gradio-FF4255?logo=gradio)](https://huggingface.co/spaces/tacofairy/zai-vision-suite)
+[![Streamlit Demo](https://img.shields.io/badge/🚀-Try%20Streamlit-FF4255?logo=streamlit)](https://huggingface.co/spaces/tacofairy/zai-vision-suite-streamlit)
+
 *Advanced computer vision capabilities powered by Zhipu AI's GLM-4V multimodal model*
 
 ---
@@ -211,7 +214,14 @@ vision-chat photo.jpg "Describe the mood of this image"
 
 ## 🌐 Web Application
 
-A beautiful web interface is included for interactive use.
+### 🚀 Live Demos (Hosted on Hugging Face Spaces - Free!)
+
+| App | URL | Status |
+|-----|-----|--------|
+| **Gradio App** | [![Hugging Face Spaces](https://img.shields.io/badge/🤗-Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/tacofairy/zai-vision-suite) | Live |
+| **Streamlit App** | [![Hugging Face Spaces](https://img.shields.io/badge/🤗-Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/tacofairy/zai-vision-suite-streamlit) | Live |
+
+👆 **Click the badges above to try the apps now!**
 
 ### Running Locally
 
@@ -235,15 +245,15 @@ streamlit run app_streamlit.py
 
 ### Deploy to Free Hosting (Recommended)
 
-#### Hugging Face Spaces (Free - Recommended)
+#### Hugging Face Spaces (Free - Recommended) ⭐
 
 The easiest way to deploy - supports both Gradio and Streamlit natively!
 
 1. Go to [huggingface.co/spaces](https://huggingface.co/spaces) and click **"Create new Space"**
-2. Choose **Gradio** or **Streamlit** as SDK
+2. Choose **Gradio** or **Docker** (for Streamlit) as SDK
 3. Upload the files from `webapp/` directory
 4. Add your `ZAI_API_KEY` as a secret in Settings (or let users enter via UI)
-5. Your app will be live at: `https://huggingface.co/spaces/YOUR_USERNAME/zai-vision-suite`
+5. Your app will be live in minutes!
 
 See [webapp/README.md](webapp/README.md) for detailed deployment instructions.
 
@@ -256,11 +266,14 @@ See [webapp/README.md](webapp/README.md) for detailed deployment instructions.
 | **Render** | ✅ | ❌ | [render.com](https://render.com) |
 | **Railway** | ✅ | ✅ | [railway.app](https://railway.app) |
 
+### Features
+
 The web app includes:
 - **Image Analysis Tab**: Upload images for detailed visual analysis
 - **OCR Tab**: Extract text from images with live preview
 - **Vision Search Tab**: Search the web using images
 - **Vision Chat Tab**: Ask questions about images in natural language
+- **API Key Input**: Enter your key directly in the UI (no setup required!)
 
 ---
 
@@ -375,8 +388,10 @@ MIT © [Ripnrip](https://github.com/Ripnrip)
 ## 🔗 Links
 
 - [GitHub Repository](https://github.com/Ripnrip/zai-vision-suite)
-- [Zhipu AI Documentation](https://open.bigmodel.cn/dev/api)
+- [🎨 Gradio Live Demo](https://huggingface.co/spaces/tacofairy/zai-vision-suite)
+- [🚀 Streamlit Live Demo](https://huggingface.co/spaces/tacofairy/zai-vision-suite-streamlit)
 - [NPM Package](https://www.npmjs.com/package/zai-vision-suite)
+- [Zhipu AI Documentation](https://open.bigmodel.cn/dev/api)
 - [Issue Tracker](https://github.com/Ripnrip/zai-vision-suite/issues)
 
 ---
