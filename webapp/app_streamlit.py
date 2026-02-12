@@ -2,7 +2,7 @@ import streamlit as st
 import os
 import base64
 import tempfile
-import cv2
+import cv
 import numpy as np
 from PIL import Image as PILImage
 from io import BytesIO
