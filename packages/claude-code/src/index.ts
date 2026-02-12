@@ -3,7 +3,7 @@
  * Provides Z.ai vision commands to Claude Code CLI
  */
 
-import { zaiVisionClient, zaiVisionOptions } from 'zai-vision-suite';
+import { ZaiVisionClient } from '../../src/shared/client.js';
 
 export interface ClaudeCommandHandler {
   canHandle(command: string): boolean;
@@ -11,6 +11,12 @@ export interface ClaudeCommandHandler {
 }
 
 export class ZaiVisionAdapter implements ClaudeCommandHandler {
+  private client: ZaiVisionClient;
+
+  constructor(apiKey?: string) {
+    this.client = new ZaiVisionClient(apiKey);
+  }
+
   canHandle(command: string): boolean {
     return [
       'analyze-image',
@@ -23,7 +29,6 @@ export class ZaiVisionAdapter implements ClaudeCommandHandler {
   }
 
   async execute(command: string, args: Record<string, any>): Promise<string> {
-    const client = new zaiVisionClient();
 
     switch (command) {
       case 'analyze-image': {
@@ -35,8 +40,12 @@ export class ZaiVisionAdapter implements ClaudeCommandHandler {
           throw new Error('Image path is required');
         }
 
-        const result = await client.analyze(imagePath, { detail, detectObjects });
-        return result.scene || result;
+        const result = await this.client.analyze(imagePath, { detail, detectObjects });
+        let output = `Scene Analysis:\n${result.scene}`;
+        if (result.objects && result.objects.length > 0) {
+          output += `\n\nObjects:\n${result.objects.map(o => `- ${o.label} (${Math.round(o.confidence * 100)}%)`).join('\n')}`;
+        }
+        return output;
       }
 
       case 'process-video': {
@@ -49,7 +58,7 @@ export class ZaiVisionAdapter implements ClaudeCommandHandler {
           throw new Error('Video path is required');
         }
 
-        const result = await client.processVideo(videoPath, { frames, segmentScenes, summarize });
+        const result = await this.client.processVideo(videoPath, { frames, segmentScenes, summarize });
         return result.summary || result;
       }
 
@@ -62,7 +71,7 @@ export class ZaiVisionAdapter implements ClaudeCommandHandler {
           throw new Error('Image path is required');
         }
 
-        const result = await client.extractText(imagePath, { preserveFormat, language });
+        const result = await this.client.extractText(imagePath, { preserveFormat, language });
         return result;
       }
 
@@ -75,8 +84,8 @@ export class ZaiVisionAdapter implements ClaudeCommandHandler {
           throw new Error('Image path is required');
         }
 
-        const result = await client.visionSearch(imagePath, { searchType, maxResults });
-        return result;
+        const result = await this.client.visionSearch(imagePath, { searchType, maxResults });
+        return `Search Query:\n${result.query}\n\nResults:\n${result.results.map(r => `- ${r.title}${r.description ? ': ' + r.description : ''}`).join('\n')}`;
       }
 
       case 'vision-web-search': {
@@ -88,13 +97,20 @@ export class ZaiVisionAdapter implements ClaudeCommandHandler {
           throw new Error('Image path is required');
         }
 
-        const result = await client.visionWebSearch(imagePath, { queryType, maxResults });
-        return result;
+        const result = await this.client.visionWebSearch(imagePath, { queryType, maxResults });
+        return `Analysis:\n${result.analysis}\n\nSuggestions:\n${result.suggestions.map(s => `- ${s}`).join('\n')}`;
       }
 
       case 'vision-chat': {
-        // Interactive conversational mode
-        return 'Interactive vision chat mode. Upload images and ask follow-up questions.';
+        const imagePath = args.get(0)?.value as string;
+        const prompt = args.get(1)?.value as string || 'What do you see in this image?';
+
+        if (!imagePath) {
+          throw new Error('Image path is required');
+        }
+
+        const result = await this.client.visionChat(imagePath, prompt);
+        return result.response;
       }
 
       default:

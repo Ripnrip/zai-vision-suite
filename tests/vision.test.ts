@@ -3,6 +3,10 @@ import { ZaiVisionClient } from '../src/shared/client';
 
 // Mock implementation for testing
 class TestVisionClient extends ZaiVisionClient {
+  constructor() {
+    super('test-api-key'); // Pass dummy API key for testing
+  }
+
   async analyze(imagePath: string, options?: any) {
     // Mock implementation
     return {
