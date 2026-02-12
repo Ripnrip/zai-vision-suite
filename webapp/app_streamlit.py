@@ -197,52 +197,52 @@ with tab1:
     st.subheader("Image Analysis")
     col1, col2 = st.columns(2)
     with col1:
-        img1 = st.file_uploader("Upload Image", type=['png', 'jpg', 'jpeg', 'gif', 'webp'])
-        detail1 = st.radio("Detail Level", ["low", "high", "auto"], index=1)
-        btn1 = st.button("Analyze Image", type="primary")
+        img1 = st.file_uploader("Upload Image", type=['png', 'jpg', 'jpeg', 'gif', 'webp'], key="img1")
+        detail1 = st.radio("Detail Level", ["low", "high", "auto"], index=1, key="detail1")
+        btn1 = st.button("Analyze Image", type="primary", key="btn1")
     with col2:
         if btn1 and img1:
             result = call_api(img1, f"Analyze this image in {detail1} detail. Describe the scene, objects, colors, and mood.", api_key)
-            st.text_area("Analysis Result", result, height=300)
+            st.text_area("Analysis Result", result, height=300, key="out1")
 
 # Tab 2: OCR
 with tab2:
     st.subheader("OCR (Extract Text)")
     col1, col2 = st.columns(2)
     with col1:
-        img2 = st.file_uploader("Upload Image", type=['png', 'jpg', 'jpeg', 'gif', 'webp'])
-        lang2 = st.selectbox("Language", ["auto", "english", "chinese", "spanish", "french", "german"], index=0)
-        btn2 = st.button("Extract Text", type="primary")
+        img2 = st.file_uploader("Upload Image", type=['png', 'jpg', 'jpeg', 'gif', 'webp'], key="img2")
+        lang2 = st.selectbox("Language", ["auto", "english", "chinese", "spanish", "french", "german"], index=0, key="lang2")
+        btn2 = st.button("Extract Text", type="primary", key="btn2")
     with col2:
         if btn2 and img2:
             result = call_api(img2, f"Extract all text from this image. Language: {lang2}. Preserve original formatting and structure.", api_key)
-            st.text_area("Extracted Text", result, height=350)
+            st.text_area("Extracted Text", result, height=350, key="out2")
 
 # Tab 3: Vision Search
 with tab3:
     st.subheader("Vision Search")
     col1, col2 = st.columns(2)
     with col1:
-        img3 = st.file_uploader("Upload Image", type=['png', 'jpg', 'jpeg', 'gif', 'webp'])
-        stype3 = st.radio("Search Type", ["web", "products", "similar"], index=0)
-        btn3 = st.button("Search", type="primary")
+        img3 = st.file_uploader("Upload Image", type=['png', 'jpg', 'jpeg', 'gif', 'webp'], key="img3")
+        stype3 = st.radio("Search Type", ["web", "products", "similar"], index=0, key="stype3")
+        btn3 = st.button("Search", type="primary", key="btn3")
     with col2:
         if btn3 and img3:
             result = call_api(img3, f"Describe this image. What search terms would find this on the web for {stype3}?", api_key)
-            st.text_area("Search Results", result, height=300)
+            st.text_area("Search Results", result, height=300, key="out3")
 
 # Tab 4: Vision Chat
 with tab4:
     st.subheader("Vision Chat")
     col1, col2 = st.columns(2)
     with col1:
-        img4 = st.file_uploader("Upload Image", type=['png', 'jpg', 'jpeg', 'gif', 'webp'])
-        prompt4 = st.text_input("Your Question", placeholder="What do you see in this image?")
-        btn4 = st.button("Ask", type="primary")
+        img4 = st.file_uploader("Upload Image", type=['png', 'jpg', 'jpeg', 'gif', 'webp'], key="img4")
+        prompt4 = st.text_input("Your Question", placeholder="What do you see in this image?", key="prompt4")
+        btn4 = st.button("Ask", type="primary", key="btn4")
     with col2:
         if btn4 and img4:
             result = call_api(img4, prompt4 or "What do you see in this image?", api_key)
-            st.text_area("AI Response", result, height=300)
+            st.text_area("AI Response", result, height=300, key="out4")
 
 # Tab 5: Video Processing
 with tab5:
@@ -254,9 +254,9 @@ with tab5:
         col1, col2 = st.columns(2)
 
         with col1:
-            video5 = st.file_uploader("Upload Video", type=['mp4', 'webm', 'mov'])
-            num_frames5 = st.slider("Number of Frames to Extract", min_value=1, max_value=50, value=10, step=1)
-            btn5 = st.button("Process Video", type="primary")
+            video5 = st.file_uploader("Upload Video", type=['mp4', 'webm', 'mov'], key="video5")
+            num_frames5 = st.slider("Number of Frames to Extract", min_value=1, max_value=50, value=10, step=1, key="num_frames5")
+            btn5 = st.button("Process Video", type="primary", key="btn5")
 
         with col2:
             if btn5 and video5:
