@@ -11,7 +11,7 @@
 [![Gradio Demo](https://img.shields.io/badge/🎨-Try%20Gradio-FF4255?logo=gradio)](https://huggingface.co/spaces/tacofairy/zai-vision-suite)
 [![Streamlit Demo](https://img.shields.io/badge/🚀-Streamlit%20Cloud-FF4255?logo=streamlit)](https://zai-vision-suite-bxnkmkjce5z9ec9kpsxfpp.streamlit.app)
 
-*Advanced computer vision capabilities powered by Zhipu AI's GLM-4V multimodal model*
+*Advanced computer vision capabilities powered by Z AI's GLM-4V multimodal model*
 
 ---
 
@@ -73,7 +73,7 @@ npm install -g zai-vision-suite
 ### Prerequisites
 
 - Node.js 18+ or TypeScript 5.0+
-- Zhipu AI API key from [https://open.bigmodel.cn/](https://open.bigmodel.cn/)
+- Z AI API key from [https://z.ai/](https://z.ai/)
 
 ---
 
@@ -298,7 +298,7 @@ npm run test:watch
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `ZAI_API_KEY` | Your Zhipu AI API key | *required* |
+| `ZAI_API_KEY` | Your Z AI API key | *required* |
 | `ZAI_BASE_URL` | API base URL | `https://api.z.ai/api/paas/v4` |
 | `ZAI_MODEL_VISION` | Model name | `glm-4.6v` |
 | `ZAI_MAX_RETRIES` | Max retry attempts | `3` |
@@ -391,13 +391,13 @@ MIT © [Ripnrip](https://github.com/Ripnrip)
 - [🎨 Gradio Live Demo](https://huggingface.co/spaces/tacofairy/zai-vision-suite)
 - [🚀 Streamlit Live Demo](https://huggingface.co/spaces/tacofairy/zai-vision-suite-streamlit)
 - [NPM Package](https://www.npmjs.com/package/zai-vision-suite)
-- [Zhipu AI Documentation](https://open.bigmodel.cn/dev/api)
+- [Z AI Documentation](https://z.ai/dev/api)
 - [Issue Tracker](https://github.com/Ripnrip/zai-vision-suite/issues)
 
 ---
 
 <div align="center">
 
-**Built with ❤️ using TypeScript & Zhipu AI GLM-4V**
+**Built with ❤️ using TypeScript & Z AI GLM-4V**
 
 </div>

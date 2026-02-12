@@ -27,12 +27,12 @@ def encode_image(img_path):
 
 
 def call_api(img_path, prompt, api_key):
-    """Make API call to Zhipu AI."""
+    """Make API call to Z AI."""
     if not img_path:
         return "Please upload an image."
 
     if not api_key:
-        return "**Demo Mode** - Enter your Zhipu AI API key above for real AI.\n\nUpload an image and enter your key to use real AI."
+        return "**Demo Mode** - Enter your Z AI API key above for real AI.\n\nUpload an image and enter your key to use real AI."
 
     try:
         resp = requests.post(
@@ -60,7 +60,7 @@ def call_api(img_path, prompt, api_key):
 def analyze_image(img_path, api_key):
     """Analyze a single image using AI API."""
     if not api_key:
-        return "**Demo Mode** - Enter your Zhipu AI API key above for real AI."
+        return "**Demo Mode** - Enter your Z AI API key above for real AI."
 
     try:
         resp = requests.post(
@@ -127,7 +127,7 @@ def process_video(video_file, num_frames, api_key):
         return None, "Please upload a video file.", []
 
     if not api_key:
-        return None, "**Demo Mode** - Enter your Zhipu AI API key above for real AI.\n\nUpload a video and enter your key to use real AI.", []
+        return None, "**Demo Mode** - Enter your Z AI API key above for real AI.\n\nUpload a video and enter your key to use real AI.", []
 
     try:
         # Extract frames from video
@@ -173,11 +173,11 @@ st.set_page_config(
 
 # Header
 st.title("🖼️ Z.ai Vision Suite")
-st.markdown("AI-Powered Visual Intelligence powered by Zhipu AI's GLM-4V")
+st.markdown("AI-Powered Visual Intelligence powered by Z AI's GLM-4V")
 
 # API Key input
 api_key = st.text_input(
-    "🔑 Zhipu AI API Key (get it from https://open.bigmodel.cn/)",
+    "🔑 Z AI API Key (get it from https://z.ai/)",
     type="password",
     placeholder="Enter your API key here...",
     value=os.environ.get("ZAI_API_KEY", "")
@@ -296,4 +296,4 @@ with tab5:
                         st.markdown(summary)
 
 # Footer
-st.markdown("---\n### 🔑 Get Your API Key\n\nVisit [Zhipu AI](https://open.bigmodel.cn/) to sign up and get your free API key.")
+st.markdown("---\n### 🔑 Get Your API Key\n\nVisit [Z AI](https://z.ai/) to sign up and get your free API key.")

@@ -22,7 +22,7 @@ def call_api(img, prompt, api_key):
     if not img:
         return "Please upload an image."
     if not api_key:
-        return "**Demo Mode** - Enter your Zhipu AI API key above for real AI.\n\nUpload an image and enter your key to use real AI."
+        return "**Demo Mode** - Enter your Z AI API key above for real AI.\n\nUpload an image and enter your key to use real AI."
 
     import requests
     try:
@@ -47,7 +47,7 @@ def call_api(img, prompt, api_key):
 def analyze_image(img, api_key):
     """Analyze a single image using the AI API."""
     if not api_key:
-        return "**Demo Mode** - Enter your Zhipu AI API key above for real AI."
+        return "**Demo Mode** - Enter your Z AI API key above for real AI."
 
     import requests
     try:
@@ -108,7 +108,7 @@ def process_video(video, num_frames, api_key):
         return None, "Please upload a video file.", ""
 
     if not api_key:
-        return None, "**Demo Mode** - Enter your Zhipu AI API key above for real AI.\n\nUpload a video and enter your key to use real AI.", ""
+        return None, "**Demo Mode** - Enter your Z AI API key above for real AI.\n\nUpload a video and enter your key to use real AI.", ""
 
     try:
         # Extract frames from video
@@ -162,10 +162,10 @@ def show_frame_analysis(frame_analyses, frame_idx):
 
 
 with gr.Blocks(title="Z.ai Vision Suite") as demo:
-    gr.Markdown("# 🖼️ Z.ai Vision Suite\n\nAI-Powered Visual Intelligence powered by Zhipu AI\'s GLM-4V")
+    gr.Markdown("# 🖼️ Z.ai Vision Suite\n\nAI-Powered Visual Intelligence powered by Z AI\'s GLM-4V")
     
     api_key = gr.Textbox(
-        label="🔑 Zhipu AI API Key (get it from https://open.bigmodel.cn/)",
+        label="🔑 Z AI API Key (get it from https://z.ai/)",
         type="password",
         placeholder="Enter your API key here...",
         value=os.environ.get("ZAI_API_KEY", "")
@@ -277,7 +277,7 @@ with gr.Blocks(title="Z.ai Vision Suite") as demo:
                 outputs=[frame_preview, frame_analysis]
             )
 
-    gr.Markdown("---\n### 🔑 Get Your API Key\n\nVisit [Zhipu AI](https://open.bigmodel.cn/) to sign up and get your free API key.")
+    gr.Markdown("---\n### 🔑 Get Your API Key\n\nVisit [Z AI](https://z.ai/) to sign up and get your free API key.")
 
 if __name__ == "__main__":
     demo.launch()
