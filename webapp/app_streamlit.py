@@ -13,7 +13,7 @@ from io import BytesIO
 import requests
 
 # Configuration
-API_URL = os.environ.get("ZAI_BASE_URL", "https://open.bigmodel.cn/api/paas/v4")
+API_URL = os.environ.get("ZAI_BASE_URL", "https://api.z.ai/api/paas/v4")
 MODEL = os.environ.get("ZAI_MODEL_VISION", "glm-4.6v")
 
 
