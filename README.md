@@ -9,7 +9,7 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue.svg)](https://www.typescriptlang.org/)
 
 [![Gradio Demo](https://img.shields.io/badge/🎨-Try%20Gradio-FF4255?logo=gradio)](https://huggingface.co/spaces/tacofairy/zai-vision-suite)
-[![Streamlit Demo](https://img.shields.io/badge/🚀-Try%20Streamlit-FF4255?logo=streamlit)](https://huggingface.co/spaces/tacofairy/zai-vision-suite-streamlit)
+[![Streamlit Demo](https://img.shields.io/badge/🚀-Streamlit%20Cloud-FF4255?logo=streamlit)](https://zai-vision-suite-bxnkmkjce5z9ec9kpsxfpp.streamlit.app)
 
 *Advanced computer vision capabilities powered by Zhipu AI's GLM-4V multimodal model*
 
