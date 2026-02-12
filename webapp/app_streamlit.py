@@ -2,8 +2,12 @@ import streamlit as st
 import os
 import base64
 import tempfile
-import cv2
-import numpy as np
+try:
+    import cv2
+    import numpy as np
+    OPENCV_AVAILABLE = True
+except ImportError:
+    OPENCV_AVAILABLE = False
 from PIL import Image as PILImage
 from io import BytesIO
 import requests
@@ -83,6 +87,9 @@ def analyze_image(img_path, api_key):
 
 def extract_frames_from_video(video_path, num_frames=10):
     """Extract frames from video using OpenCV."""
+    if not OPENCV_AVAILABLE:
+        return None, "Video processing requires OpenCV which is not available in this environment."
+
     try:
         cap = cv2.VideoCapture(video_path)
         if not cap.isOpened():
@@ -241,49 +248,52 @@ with tab4:
 with tab5:
     st.subheader("Video Processing")
 
-    col1, col2 = st.columns(2)
+    if not OPENCV_AVAILABLE:
+        st.error("🚫 **Video processing is not available in this environment.**\n\nOpenCV requires system libraries that aren't installed on Streamlit Cloud. Please use the [Gradio version on Hugging Face](https://huggingface.co/spaces/tacofairy/zai-vision-suite) for video processing features.")
+    else:
+        col1, col2 = st.columns(2)
 
-    with col1:
-        video5 = st.file_uploader("Upload Video", type=['mp4', 'webm', 'mov'])
-        num_frames5 = st.slider("Number of Frames to Extract", min_value=1, max_value=50, value=10, step=1)
-        btn5 = st.button("Process Video", type="primary")
+        with col1:
+            video5 = st.file_uploader("Upload Video", type=['mp4', 'webm', 'mov'])
+            num_frames5 = st.slider("Number of Frames to Extract", min_value=1, max_value=50, value=10, step=1)
+            btn5 = st.button("Process Video", type="primary")
 
-    with col2:
-        if btn5 and video5:
-            with st.spinner("Processing video..."):
-                first_frame, extraction_info, frame_analyses = process_video(video5, num_frames5, api_key)
+        with col2:
+            if btn5 and video5:
+                with st.spinner("Processing video..."):
+                    first_frame, extraction_info, frame_analyses = process_video(video5, num_frames5, api_key)
 
-                if first_frame is not None:
-                    st.success("Video processed successfully!")
+                    if first_frame is not None:
+                        st.success("Video processed successfully!")
 
-                    # Display extraction info
-                    st.info(extraction_info)
+                        # Display extraction info
+                        st.info(extraction_info)
 
-                    # Frame viewer
-                    st.subheader("Frame Viewer")
+                        # Frame viewer
+                        st.subheader("Frame Viewer")
 
-                    # Frame slider
-                    frame_idx = st.slider(
-                        "Select Frame",
-                        min_value=1,
-                        max_value=len(frame_analyses),
-                        value=1,
-                        step=1
-                    )
+                        # Frame slider
+                        frame_idx = st.slider(
+                            "Select Frame",
+                            min_value=1,
+                            max_value=len(frame_analyses),
+                            value=1,
+                            step=1
+                        )
 
-                    # Display selected frame
-                    if frame_analyses and 1 <= frame_idx <= len(frame_analyses):
-                        fa = frame_analyses[frame_idx - 1]
-                        st.image(fa['pil_image'], caption=f"Frame {fa['frame_number']}", use_container_width=True)
-                        st.markdown(f"**Frame {fa['frame_number']} Analysis:**")
-                        st.write(fa['analysis'])
+                        # Display selected frame
+                        if frame_analyses and 1 <= frame_idx <= len(frame_analyses):
+                            fa = frame_analyses[frame_idx - 1]
+                            st.image(fa['pil_image'], caption=f"Frame {fa['frame_number']}", use_container_width=True)
+                            st.markdown(f"**Frame {fa['frame_number']} Analysis:**")
+                            st.write(fa['analysis'])
 
-                    # Summary
-                    st.subheader("Video Summary")
-                    summary = f"## Video Processing Summary\n\n{extraction_info}\n\n### Frame Analysis Results:\n\n"
-                    for fa in frame_analyses:
-                        summary += f"**Frame {fa['frame_number']}:**\n{fa['analysis']}\n\n"
-                    st.markdown(summary)
+                        # Summary
+                        st.subheader("Video Summary")
+                        summary = f"## Video Processing Summary\n\n{extraction_info}\n\n### Frame Analysis Results:\n\n"
+                        for fa in frame_analyses:
+                            summary += f"**Frame {fa['frame_number']}:**\n{fa['analysis']}\n\n"
+                        st.markdown(summary)
 
 # Footer
 st.markdown("---\n### 🔑 Get Your API Key\n\nVisit [Zhipu AI](https://open.bigmodel.cn/) to sign up and get your free API key.")
