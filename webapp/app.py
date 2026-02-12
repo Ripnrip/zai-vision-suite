@@ -2,7 +2,7 @@ import gradio as gr
 import os
 import base64
 import tempfile
-import cv
+import cv2
 import numpy as np
 from PIL import Image as PILImage
 from io import BytesIO
@@ -72,12 +72,12 @@ def analyze_image(img, api_key):
 def extract_frames_from_video(video_path, num_frames=10):
     """Extract frames from video using OpenCV."""
     try:
-        cap = cv.VideoCapture(video_path)
+        cap = cv2.VideoCapture(video_path)
         if not cap.isOpened():
             return None, "Could not open video file."
 
-        total_frames = int(cap.get(cv.CAP_PROP_FRAME_COUNT))
-        fps = cap.get(cv.CAP_PROP_FPS)
+        total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+        fps = cap.get(cv2.CAP_PROP_FPS)
         duration = total_frames / fps if fps > 0 else 0
 
         # Calculate frame indices to extract
@@ -89,11 +89,11 @@ def extract_frames_from_video(video_path, num_frames=10):
 
         frames = []
         for idx in frame_indices:
-            cap.set(cv.CAP_PROP_POS_FRAMES, idx)
+            cap.set(cv2.CAP_PROP_POS_FRAMES, idx)
             ret, frame = cap.read()
             if ret:
                 # Convert BGR to RGB
-                frame_rgb = cv.cvtColor(frame, cv.COLOR_BGR2RGB)
+                frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                 frames.append(frame_rgb)
 
         cap.release()
