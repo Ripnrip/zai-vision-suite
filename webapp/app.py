@@ -176,21 +176,7 @@ To enable real AI chat:
 
 # Gradio Interface
 with gr.Blocks(
-    title="Z.ai Vision Suite",
-    theme=gr.themes.Soft(),
-    css="""
-    .gradio-container {
-        max-width: 1200px !important;
-    }
-    .header {
-        text-align: center;
-        padding: 20px;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        border-radius: 10px;
-        margin-bottom: 20px;
-    }
-    """
+    title="Z.ai Vision Suite"
 ) as app:
 
     gr.Markdown("""
@@ -225,13 +211,11 @@ with gr.Blocks(
                     scene_output = gr.Textbox(
                         label="Scene Description",
                         lines=8,
-                        show_copy_button=True
-                    )
+                                            )
                     objects_output = gr.Textbox(
                         label="Detected Objects",
                         lines=5,
-                        show_copy_button=True
-                    )
+                                            )
 
         # Tab 2: OCR
         with gr.Tab("OCR (Extract Text)"):
@@ -256,8 +240,7 @@ with gr.Blocks(
                     ocr_output = gr.Textbox(
                         label="Extracted Text",
                         lines=12,
-                        show_copy_button=True
-                    )
+                                            )
 
         # Tab 3: Vision Search
         with gr.Tab("Vision Search"):
@@ -285,13 +268,11 @@ with gr.Blocks(
                     search_query = gr.Textbox(
                         label="Generated Search Query",
                         lines=2,
-                        show_copy_button=True
-                    )
+                                            )
                     search_results = gr.Textbox(
                         label="Search Results",
                         lines=10,
-                        show_copy_button=True
-                    )
+                                            )
 
         # Tab 4: Vision Chat
         with gr.Tab("Vision Chat"):
@@ -320,8 +301,7 @@ with gr.Blocks(
                     chat_response = gr.Textbox(
                         label="AI Response",
                         lines=12,
-                        show_copy_button=True
-                    )
+                                            )
                     chat_usage = gr.Textbox(
                         label="Token Usage",
                         lines=2
@@ -391,4 +371,18 @@ if __name__ == "__main__":
         share=False,
         show_error=True,
         quiet=False,
+        theme=gr.themes.Soft(),
+        css="""
+        .gradio-container {
+            max-width: 1200px !important;
+        }
+        .header {
+            text-align: center;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        """
     )

@@ -33,6 +33,30 @@
 
 ---
 
+## 📸 Screenshots
+
+### Homepage
+
+![Homepage](docs/screenshots/01-homepage.png)
+
+### Image Analysis Tab
+
+![Image Analysis](docs/screenshots/05-image-analysis-tab.png)
+
+### OCR Tab
+
+![OCR](docs/screenshots/02-ocr-tab.png)
+
+### Vision Search Tab
+
+![Vision Search](docs/screenshots/03-vision-search-tab.png)
+
+### Vision Chat Tab
+
+![Vision Chat](docs/screenshots/04-vision-chat-tab.png)
+
+---
+
 ## 📦 Installation
 
 ```bash
