@@ -7,20 +7,14 @@ A standalone web interface for all vision operations using Gradio
 import gradio as gr
 import os
 import base64
+import json
+import requests
 from pathlib import Path
 from typing import Optional, Tuple, List
-import sys
-
-# Add src directory to path for TypeScript import simulation
-# In production, we'd use the compiled JS version
 
 # Configuration
-API_KEY = os.environ.get('ZAI_API_KEY', '')
 API_URL = os.environ.get('ZAI_BASE_URL', 'https://open.bigmodel.cn/api/paas/v4')
 MODEL = os.environ.get('ZAI_MODEL_VISION', 'glm-4v')
-
-# For demo purposes, we'll simulate the API responses
-# In production, this would call the actual Zhipu AI API
 
 
 def encode_image_to_base64(image_path: str) -> str:
@@ -46,104 +40,186 @@ def encode_image_to_base64(image_path: str) -> str:
         raise gr.Error(f"Failed to read image: {str(e)}")
 
 
-def simulate_analyze_image(image_path: str, detail: str = 'high') -> Tuple[str, str]:
-    """
-    Simulate image analysis (demo mode)
-    In production, this would call the Zhipu AI API
-    """
+def call_zhipu_api(api_key: str, messages: List, max_tokens: int = 1024) -> dict:
+    """Make actual API call to Zhipu AI"""
+    if not api_key:
+        return None
+
+    url = f"{API_URL}/chat/completions"
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json"
+    }
+
+    payload = {
+        "model": MODEL,
+        "messages": messages,
+        "max_tokens": max_tokens,
+        "temperature": 0.7
+    }
+
+    try:
+        response = requests.post(url, headers=headers, json=payload, timeout=60)
+        response.raise_for_status()
+        return response.json()
+    except Exception as e:
+        raise gr.Error(f"API call failed: {str(e)}")
+
+
+def analyze_image_real(image_path: str, detail: str = 'high', api_key: str = '') -> Tuple[str, str]:
+    """Analyze image with real API or demo mode"""
     if image_path is None:
         return "Please upload an image.", ""
 
     try:
         base64_image = encode_image_to_base64(image_path)
 
-        # Simulated response for demo
-        scene = f"""I can see this image. This appears to be a demonstration image for the Z.ai Vision Suite.
+        if api_key:
+            # Real API call
+            messages = [{
+                "role": "user",
+                "content": [
+                    {"type": "image_url", "image_url": {"url": base64_image}},
+                    {"type": "text", "text": f"Analyze this image in {detail} detail. Describe the scene, main objects, colors, mood, and any notable features."}
+                ]
+            }]
 
-In production mode with a valid ZAI_API_KEY, this would provide:
-- Detailed scene analysis at {detail} detail level
+            result = call_zhipu_api(api_key, messages, max_tokens=2048)
+
+            if result and 'choices' in result:
+                content = result['choices'][0]['message']['content']
+
+                # Parse response into scene and objects
+                scene = content
+
+                objects_info = ""
+                if 'usage' in result:
+                    objects_info = f"\n\n*Tokens used: {result['usage']['total_tokens']}*"
+
+                return scene, objects_info
+
+        # Demo mode fallback
+        scene = f"""**Demo Mode - No API Key Provided**
+
+This is a simulated analysis. Enter your Zhipu AI API key above for real AI analysis.
+
+**What real AI would provide:**
+- Detailed scene understanding at {detail} detail level
 - Object detection with confidence scores
 - Color palette and mood analysis
-- Contextual understanding
+- Contextual information
 
-To use real AI analysis:
-1. Set your Zhipu AI API key: export ZAI_API_KEY="your-key-here"
-2. Restart the application
-3. Upload your image for actual AI analysis"""
+**To enable real AI:**
+1. Enter your Zhipu AI API key in the field above
+2. Upload your image again
+3. Get actual AI-powered analysis"""
 
-        objects = "Objects would be detected here in production mode."
-
+        objects = "Enter API key above for real AI analysis →"
         return scene, objects
+
     except Exception as e:
         raise gr.Error(f"Analysis failed: {str(e)}")
 
 
-def simulate_extract_text(image_path: str, language: str = 'auto') -> str:
-    """Simulate OCR text extraction"""
+def extract_text_real(image_path: str, language: str = 'auto', api_key: str = '') -> str:
+    """Extract text with real API or demo mode"""
     if image_path is None:
         return "Please upload an image."
 
     try:
         base64_image = encode_image_to_base64(image_path)
 
-        text = f"""DEMO MODE - Simulated OCR Result
+        if api_key:
+            prompt = "Extract all text from this image. Preserve the original formatting, line breaks, and structure. Return only the extracted text."
+            if language != 'auto':
+                prompt += f" The text is in {language}."
 
-This is a demonstration response. In production mode with a valid ZAI_API_KEY,
-this would extract actual text from your image with {language} language detection.
+            messages = [{
+                "role": "user",
+                "content": [
+                    {"type": "image_url", "image_url": {"url": base64_image}},
+                    {"type": "text", "text": prompt}
+                ]
+            }]
 
-The Z.ai Vision Suite OCR supports:
-- 100+ languages
-- Auto language detection
-- Format preservation
-- Multi-column layout handling
+            result = call_zhipu_api(api_key, messages, max_tokens=4096)
 
-To enable real OCR:
-1. Set your API key: export ZAI_API_KEY="your-key-here"
-2. Restart the application
-"""
+            if result and 'choices' in result:
+                text = result['choices'][0]['message']['content']
+                tokens = f"\n\n*Tokens: {result['usage']['total_tokens']}*" if 'usage' in result else ""
+                return text + tokens
 
-        return text
+        # Demo mode fallback
+        return f"""**Demo Mode - No API Key Provided**
+
+This is simulated OCR output. Enter your Zhipu AI API key above for real text extraction.
+
+**Supported Languages:**
+{language} (auto-detected in real mode)
+
+**To enable real OCR:**
+1. Enter your Zhipu AI API key in the field above
+2. Upload your document again
+3. Get accurate text extraction with 100+ language support"""
+
     except Exception as e:
         raise gr.Error(f"OCR failed: {str(e)}")
 
 
-def simulate_vision_search(image_path: str, search_type: str = 'web') -> Tuple[str, str]:
-    """Simulate vision-based web search"""
+def vision_search_real(image_path: str, search_type: str = 'web', api_key: str = '') -> Tuple[str, str]:
+    """Vision search with real API or demo mode"""
     if image_path is None:
         return "Please upload an image.", ""
 
     try:
         base64_image = encode_image_to_base64(image_path)
 
-        query = f"Visual search query for: {Path(image_path).name}"
+        if api_key:
+            prompts = {
+                'web': 'Describe this image in detail. What search terms would find this on the web?',
+                'products': 'Identify any products in this image. What are they and where might someone buy them?',
+                'similar': 'Describe this image. What search terms would find similar images?'
+            }
 
-        results = f"""Search Results (Demo Mode)
+            messages = [{
+                "role": "user",
+                "content": [
+                    {"type": "image_url", "image_url": {"url": base64_image}},
+                    {"type": "text", "text": prompts.get(search_type, prompts['web'])}
+                ]
+            }]
 
-Query: {query}
-Type: {search_type}
+            result = call_zhipu_api(api_key, messages)
 
-In production mode, this would:
-1. Analyze the image content
-2. Generate relevant search queries
-3. Return actual web search results from:
-   - Product databases (for items/shopping)
-   - Image search engines (for similar visuals)
-   - General web search (for information)
+            if result and 'choices' in result:
+                query = result['choices'][0]['message']['content']
+                tokens = f"\n*Tokens: {result['usage']['total_tokens']}*" if 'usage' in result else ""
+                return query, f"**Search Type:** {search_type}\n\n{query}{tokens}"
 
-To enable real search:
-1. Set your API key: export ZAI_API_KEY="your-key-here"
-2. Restart the application
-"""
+        # Demo mode fallback
+        query = f"Visual search for: {Path(image_path).name}"
+        results = f"""**Demo Mode - No API Key Provided**
 
+Enter your Zhipu AI API key above for real vision search.
+
+**What would happen:**
+1. AI analyzes your image content
+2. Generates optimal search queries
+3. Returns relevant web results
+
+**Search Type:** {search_type}
+
+To enable real search, enter your API key above!"""
         return query, results
+
     except Exception as e:
         raise gr.Error(f"Search failed: {str(e)}")
 
 
-def simulate_vision_chat(image_path: str, prompt: str) -> Tuple[str, str]:
-    """Simulate conversational vision mode"""
+def vision_chat_real(image_path: str, prompt: str, api_key: str = '') -> Tuple[str, str]:
+    """Vision chat with real API or demo mode"""
     if image_path is None:
-        return "Please upload an image.", "Enter your question about the image."
+        return "Please upload an image.", "Enter your question."
 
     if not prompt:
         prompt = "What do you see in this image?"
@@ -151,25 +227,37 @@ def simulate_vision_chat(image_path: str, prompt: str) -> Tuple[str, str]:
     try:
         base64_image = encode_image_to_base64(image_path)
 
-        response = f"""Demo Response to: "{prompt}"
+        if api_key:
+            messages = [{
+                "role": "user",
+                "content": [
+                    {"type": "image_url", "image_url": {"url": base64_image}},
+                    {"type": "text", "text": prompt}
+                ]
+            }]
 
-This is a simulated response. In production mode with a valid ZAI_API_KEY,
-the AI would provide actual, contextual answers about your image.
+            result = call_zhipu_api(api_key, messages, max_tokens=2048)
 
-The Z.ai Vision Chat supports:
+            if result and 'choices' in result:
+                response = result['choices'][0]['message']['content']
+                usage = f"Tokens: {result['usage'].get('total_tokens', 'N/A')}" if 'usage' in result else "Tokens: N/A"
+                return response, usage
+
+        # Demo mode fallback
+        response = f"""**Demo Mode - No API Key Provided**
+
+This is a simulated response to: "{prompt}"
+
+**Enter your API key above** to get real AI responses about your images!
+
+**Vision Chat supports:**
 - Natural conversation about images
 - Follow-up questions
 - Detailed analysis on demand
-- Multiple interaction rounds
+- Multi-language support"""
 
-To enable real AI chat:
-1. Set your API key: export ZAI_API_KEY="your-key-here"
-2. Restart the application
-3. Ask specific questions about your images
-"""
+        return response, "Tokens: ~100 (demo mode)"
 
-        usage = "Tokens: ~100 (demo mode)"
-        return response, usage
     except Exception as e:
         raise gr.Error(f"Chat failed: {str(e)}")
 
@@ -183,13 +271,26 @@ with gr.Blocks(
     # 🖼️ Z.ai Vision Suite
 
     Multi-platform AI vision integration powered by Zhipu AI's GLM-4V model.
-
-    **Setup:** Set your API key: `export ZAI_API_KEY="your-key-here"`
     """)
+
+    # API Key Input at the top
+    with gr.Row():
+        api_key_input = gr.Textbox(
+            label="🔑 Zhipu AI API Key",
+            placeholder="Enter your API key here (or set ZAI_API_KEY environment variable)",
+            type="password",
+            value=os.environ.get('ZAI_API_KEY', ''),
+            container=True,
+            scale=4
+        )
+        api_status = gr.Markdown(
+            "✅ **API Key Set**" if os.environ.get('ZAI_API_KEY') else "⚠️ **Enter API key for real AI**",
+            scale=1
+        )
 
     with gr.Tabs():
         # Tab 1: Image Analysis
-        with gr.Tab("Image Analysis"):
+        with gr.Tab("🔍 Image Analysis"):
             with gr.Row():
                 with gr.Column(scale=1):
                     image_input = gr.Image(
@@ -201,24 +302,20 @@ with gr.Blocks(
                         value="high",
                         label="Detail Level"
                     )
-                    detect_objects = gr.Checkbox(
-                        value=True,
-                        label="Detect Objects"
-                    )
                     analyze_btn = gr.Button("Analyze Image", variant="primary")
 
                 with gr.Column(scale=1):
                     scene_output = gr.Textbox(
                         label="Scene Description",
-                        lines=8,
-                                            )
+                        lines=10
+                    )
                     objects_output = gr.Textbox(
-                        label="Detected Objects",
-                        lines=5,
-                                            )
+                        label="Objects & Details",
+                        lines=5
+                    )
 
         # Tab 2: OCR
-        with gr.Tab("OCR (Extract Text)"):
+        with gr.Tab("📝 OCR (Extract Text)"):
             with gr.Row():
                 with gr.Column(scale=1):
                     ocr_image = gr.Image(
@@ -230,20 +327,16 @@ with gr.Blocks(
                         value="auto",
                         label="Language"
                     )
-                    preserve_format = gr.Checkbox(
-                        value=True,
-                        label="Preserve Formatting"
-                    )
                     ocr_btn = gr.Button("Extract Text", variant="primary")
 
                 with gr.Column(scale=1):
                     ocr_output = gr.Textbox(
                         label="Extracted Text",
-                        lines=12,
-                                            )
+                        lines=15
+                    )
 
         # Tab 3: Vision Search
-        with gr.Tab("Vision Search"):
+        with gr.Tab("🔎 Vision Search"):
             with gr.Row():
                 with gr.Column(scale=1):
                     search_image = gr.Image(
@@ -255,27 +348,20 @@ with gr.Blocks(
                         value="web",
                         label="Search Type"
                     )
-                    max_results = gr.Slider(
-                        minimum=1,
-                        maximum=20,
-                        value=5,
-                        step=1,
-                        label="Max Results"
-                    )
                     search_btn = gr.Button("Search", variant="primary")
 
                 with gr.Column(scale=1):
                     search_query = gr.Textbox(
                         label="Generated Search Query",
-                        lines=2,
-                                            )
+                        lines=3
+                    )
                     search_results = gr.Textbox(
                         label="Search Results",
-                        lines=10,
-                                            )
+                        lines=12
+                    )
 
         # Tab 4: Vision Chat
-        with gr.Tab("Vision Chat"):
+        with gr.Tab("💬 Vision Chat"):
             with gr.Row():
                 with gr.Column(scale=1):
                     chat_image = gr.Image(
@@ -288,20 +374,21 @@ with gr.Blocks(
                         lines=2
                     )
                     chat_btn = gr.Button("Ask", variant="primary")
-                    chat_examples = gr.Examples(
+                    gr.Examples(
                         examples=[
-                            ["example.jpg", "What colors are dominant in this image?"],
-                            ["screenshot.png", "Describe the mood and atmosphere"],
-                            ["diagram.jpg", "Explain the flow shown in this diagram"],
+                            ["What colors are dominant in this image?"],
+                            ["Describe the mood and atmosphere"],
+                            ["What text is visible in this image?"],
+                            ["Count the number of people"],
                         ],
-                        inputs=[chat_image, chat_prompt],
+                        inputs=chat_prompt,
                     )
 
                 with gr.Column(scale=1):
                     chat_response = gr.Textbox(
                         label="AI Response",
-                        lines=12,
-                                            )
+                        lines=15
+                    )
                     chat_usage = gr.Textbox(
                         label="Token Usage",
                         lines=2
@@ -310,58 +397,62 @@ with gr.Blocks(
     # Footer
     gr.Markdown("""
     ---
-    ### API Configuration
+    ### 🔑 Get Your API Key
 
-    To use with real AI, set these environment variables:
+    1. Visit [Zhipu AI Open Platform](https://open.bigmodel.cn/)
+    2. Sign up and get your API key
+    3. Enter it in the field above to enable real AI features
 
-    ```bash
-    export ZAI_API_KEY="your-zhipu-ai-api-key"
-    export ZAI_BASE_URL="https://open.bigmodel.cn/api/paas/v4"
-    export ZAI_MODEL_VISION="glm-4v"
-    ```
+    ### 📚 Resources
 
-    ### Links
-
-    - [Get API Key](https://open.bigmodel.cn/)
-    - [Documentation](https://github.com/Ripnrip/zai-vision-suite)
     - [GitHub Repository](https://github.com/Ripnrip/zai-vision-suite)
+    - [Zhipu AI Documentation](https://open.bigmodel.cn/dev/api)
     """)
 
     # Event handlers
+    def update_api_status(key):
+        if key:
+            return "✅ **API Key Ready**"
+        return "⚠️ **Enter API key for real AI**"
+
+    api_key_input.change(
+        fn=update_api_status,
+        inputs=api_key_input,
+        outputs=api_status
+    )
+
     analyze_btn.click(
-        fn=lambda img, detail, detect: simulate_analyze_image(img or "", detail) if img else ("No image uploaded", ""),
-        inputs=[image_input, detail_level, detect_objects],
+        fn=lambda img, detail, key: analyze_image_real(img, detail, key) if img else ("Please upload an image.", ""),
+        inputs=[image_input, detail_level, api_key_input],
         outputs=[scene_output, objects_output]
     )
 
     ocr_btn.click(
-        fn=lambda img, lang, fmt: simulate_extract_text(img or "", lang) if img else "No image uploaded",
-        inputs=[ocr_image, language, preserve_format],
+        fn=lambda img, lang, key: extract_text_real(img, lang, key) if img else "Please upload an image.",
+        inputs=[ocr_image, language, api_key_input],
         outputs=ocr_output
     )
 
     search_btn.click(
-        fn=lambda img, stype, max_r: simulate_vision_search(img or "", stype) if img else ("No image uploaded", ""),
-        inputs=[search_image, search_type, max_results],
+        fn=lambda img, stype, key: vision_search_real(img, stype, key) if img else ("Please upload an image.", ""),
+        inputs=[search_image, search_type, api_key_input],
         outputs=[search_query, search_results]
     )
 
     chat_btn.click(
-        fn=lambda img, prompt: simulate_vision_chat(img or "", prompt) if img else ("No image uploaded", ""),
-        inputs=[chat_image, chat_prompt],
+        fn=lambda img, prompt, key: vision_chat_real(img, prompt, key) if img else ("Please upload an image.", ""),
+        inputs=[chat_image, chat_prompt, api_key_input],
         outputs=[chat_response, chat_usage]
     )
 
 
 if __name__ == "__main__":
-    # Create the webapp directory if it doesn't exist
-    webapp_dir = Path(__file__).parent
-    webapp_dir.mkdir(exist_ok=True)
+    import uvicorn
 
     # Check for API key and show warning if not set
-    if not API_KEY:
-        print("⚠️  WARNING: ZAI_API_KEY not set. Running in DEMO mode.")
-        print("To use real AI features, set: export ZAI_API_KEY='your-key'")
+    if not os.environ.get('ZAI_API_KEY'):
+        print("⚠️  WARNING: ZAI_API_KEY not set in environment.")
+        print("Users can enter their API key via the web UI.")
         print("")
 
     # Launch Gradio app
@@ -374,7 +465,7 @@ if __name__ == "__main__":
         theme=gr.themes.Soft(),
         css="""
         .gradio-container {
-            max-width: 1200px !important;
+            max-width: 1400px !important;
         }
         .header {
             text-align: center;

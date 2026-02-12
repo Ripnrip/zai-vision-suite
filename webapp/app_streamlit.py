@@ -7,6 +7,7 @@ A modern web interface for all vision operations using Streamlit
 import streamlit as st
 import os
 import base64
+import requests
 from pathlib import Path
 from typing import Optional
 from io import BytesIO
@@ -38,13 +39,12 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Configuration
-API_KEY = os.environ.get('ZAI_API_KEY', '')
 API_URL = os.environ.get('ZAI_BASE_URL', 'https://open.bigmodel.cn/api/paas/v4')
 MODEL = os.environ.get('ZAI_MODEL_VISION', 'glm-4v')
 
-# Demo mode warning
-if not API_KEY:
-    st.warning("⚠️ **DEMO MODE**: ZAI_API_KEY not set. Running with simulated responses. Set your key with `export ZAI_API_KEY='your-key'`")
+# Initialize session state for API key
+if 'api_key' not in st.session_state:
+    st.session_state.api_key = os.environ.get('ZAI_API_KEY', '')
 
 
 def encode_image(image):
@@ -61,110 +61,203 @@ def encode_image(image):
     return f"data:image/png;base64,{img_str}"
 
 
-def simulate_api_call(feature: str, image_base64: str, **kwargs):
-    """Simulate API responses in demo mode"""
-    responses = {
-        "analyze": {
-            "scene": f"""**Scene Analysis ({kwargs.get('detail', 'high')} detail)**
+def call_zhipu_api(api_key: str, messages: list, max_tokens: int = 1024):
+    """Make actual API call to Zhipu AI"""
+    if not api_key:
+        return None
 
-This is a demonstration response for the Z.ai Vision Suite.
+    url = f"{API_URL}/chat/completions"
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json"
+    }
 
-In production mode with a valid API key, this would provide:
-- Comprehensive scene description
+    payload = {
+        "model": MODEL,
+        "messages": messages,
+        "max_tokens": max_tokens,
+        "temperature": 0.7
+    }
+
+    try:
+        response = requests.post(url, headers=headers, json=payload, timeout=60)
+        response.raise_for_status()
+        return response.json()
+    except Exception as e:
+        st.error(f"API call failed: {str(e)}")
+        return None
+
+
+def analyze_image(image_base64, detail='high', api_key=''):
+    """Analyze image with real API or demo mode"""
+    if api_key:
+        messages = [{
+            "role": "user",
+            "content": [
+                {"type": "image_url", "image_url": {"url": image_base64}},
+                {"type": "text", "text": f"Analyze this image in {detail} detail. Describe the scene, main objects, colors, mood, and any notable features."}
+            ]
+        }]
+
+        result = call_zhipu_api(api_key, messages, max_tokens=2048)
+
+        if result and 'choices' in result:
+            content = result['choices'][0]['message']['content']
+            tokens = result['usage'].get('total_tokens', 'N/A')
+            return content, f"Tokens: {tokens}"
+
+    # Demo mode
+    return f"""**Demo Mode - No API Key**
+
+Enter your Zhipu AI API key in the sidebar for real AI analysis.
+
+**What would be provided with an API key:**
+- Scene understanding at {detail} detail
 - Object detection with confidence scores
 - Color palette and mood analysis
-- Spatial relationships understanding
+- Contextual information""", "Tokens: N/A (demo mode)"
 
-**Setup instructions:**
-```bash
-export ZAI_API_KEY="your-zhipu-ai-api-key"
-streamlit run webapp/app_streamlit.py
-```""",
-            "objects": "**Detected Objects**\n\nObjects would be listed here with confidence percentages in production mode."
-        },
-        "ocr": {
-            "text": f"""**OCR Result ({kwargs.get('language', 'auto')} language)**
 
-This is simulated OCR text for demonstration.
+def extract_text(image_base64, language='auto', api_key=''):
+    """Extract text with real API or demo mode"""
+    if api_key:
+        prompt = "Extract all text from this image. Preserve the original formatting, line breaks, and structure."
+        if language != 'auto':
+            prompt += f" The text is in {language}."
 
-In production mode, the Z.ai Vision Suite would:
-- Extract all visible text from your image
-- Preserve original formatting and structure
-- Auto-detect language if not specified
-- Handle multi-column layouts
-- Support 100+ languages
+        messages = [{
+            "role": "user",
+            "content": [
+                {"type": "image_url", "image_url": {"url": image_base64}},
+                {"type": "text", "text": prompt}
+            ]
+        }]
 
-**Setup:**
-```bash
-export ZAI_API_KEY="your-key"
-```""",
-        },
-        "search": {
-            "query": f"Visual search query for uploaded image",
-            "results": """**Search Results** (Demo Mode)
+        result = call_zhipu_api(api_key, messages, max_tokens=4096)
 
-In production, this would return:
-- Actual search queries based on image content
-- Product listings (for shopping searches)
-- Similar images (for visual matching)
-- Information sources (for web searches)
+        if result and 'choices' in result:
+            text = result['choices'][0]['message']['content']
+            tokens = result['usage'].get('total_tokens', 'N/A')
+            return text + f"\n\n*Tokens: {tokens}*"
 
-**Setup:**
-```bash
-export ZAI_API_KEY="your-key"
-```"""
-        },
-        "chat": {
-            "response": f"""**Demo Response to: {kwargs.get('prompt', 'What do you see?')}**
+    # Demo mode
+    return f"""**Demo Mode - No API Key**
 
-This is a simulated conversational response.
+Enter your Zhipu AI API key in the sidebar for real OCR.
 
-In production mode with a valid API key, the AI would:
-- Understand visual context from your image
-- Answer specific questions about content
-- Provide detailed, contextual responses
-- Support follow-up questions
+**Supported Languages:** {language} (auto-detected with API key)
+- 100+ languages supported
+- Format preservation
+- Multi-column layout handling"""
 
-**Setup:**
-```bash
-export ZAI_API_KEY="your-key"
-```""",
-            "usage": "~100 tokens (demo mode)"
+
+def vision_search(image_base64, search_type='web', api_key=''):
+    """Vision search with real API or demo mode"""
+    if api_key:
+        prompts = {
+            'web': 'Describe this image in detail. What search terms would find this on the web?',
+            'products': 'Identify any products in this image. What are they and where might someone buy them?',
+            'similar': 'Describe this image. What search terms would find similar images?'
         }
-    }
-    return responses.get(feature, {})
+
+        messages = [{
+            "role": "user",
+            "content": [
+                {"type": "image_url", "image_url": {"url": image_base64}},
+                {"type": "text", "text": prompts.get(search_type, prompts['web'])}
+            ]
+        }]
+
+        result = call_zhipu_api(api_key, messages)
+
+        if result and 'choices' in result:
+            query = result['choices'][0]['message']['content']
+            tokens = result['usage'].get('total_tokens', 'N/A')
+            return query, f"**Search Type:** {search_type}\n\n{query}\n\n*Tokens: {tokens}*"
+
+    # Demo mode
+    return "Visual search query (demo mode)", f"""**Demo Mode - No API Key**
+
+Enter your Zhipu AI API key in the sidebar for real vision search.
+
+**Search Type:** {search_type}
+
+**What would happen:**
+1. AI analyzes your image content
+2. Generates optimal search queries
+3. Returns relevant web results"""
 
 
-# Main app
-st.markdown('<div class="main-header">')
-st.markdown("# 🖼️ Z.ai Vision Suite")
-st.markdown("### Multi-platform AI vision powered by Zhipu AI GLM-4V")
-st.markdown('</div>', unsafe_allow_html=True)
+def vision_chat(image_base64, prompt, api_key=''):
+    """Vision chat with real API or demo mode"""
+    if not prompt:
+        prompt = "What do you see in this image?"
 
-# API Key info in sidebar
+    if api_key:
+        messages = [{
+            "role": "user",
+            "content": [
+                {"type": "image_url", "image_url": {"url": image_base64}},
+                {"type": "text", "text": prompt}
+            ]
+        }]
+
+        result = call_zhipu_api(api_key, messages, max_tokens=2048)
+
+        if result and 'choices' in result:
+            response = result['choices'][0]['message']['content']
+            tokens = result['usage'].get('total_tokens', 'N/A')
+            return response, f"Tokens: {tokens}"
+
+    # Demo mode
+    return f"""**Demo Mode - No API Key**
+
+This is a simulated response to: "{prompt}"
+
+Enter your Zhipu AI API key in the sidebar for real AI responses!""", "Tokens: N/A (demo mode)"
+
+
+# Sidebar with API key input
 with st.sidebar:
-    st.markdown("### ⚙️ Configuration")
+    st.markdown("# 🔑 Configuration")
 
-    st.markdown("**Environment Variables:**")
-    st.code("""
-export ZAI_API_KEY="your-key"
-export ZAI_BASE_URL="https://open.bigmodel.cn/api/paas/v4"
-export ZAI_MODEL_VISION="glm-4v"
-    """)
+    # API Key input
+    api_key_input = st.text_input(
+        "Zhipu AI API Key",
+        value=st.session_state.api_key,
+        type="password",
+        placeholder="Enter your API key here",
+        help="Get your key from https://open.bigmodel.cn/"
+    )
 
-    st.markdown("**Get API Key:** [Zhipu AI Platform](https://open.bigmodel.cn/)")
+    # Update session state when key changes
+    if api_key_input != st.session_state.api_key:
+        st.session_state.api_key = api_key_input
+
+    # Show status
+    if st.session_state.api_key:
+        st.success("✅ API Key Ready")
+    else:
+        st.warning("⚠️ Demo Mode - Enter API key for real AI")
 
     st.markdown("---")
-    st.markdown("**Links:**")
+    st.markdown("### 📚 Resources")
+    st.markdown("- [Get API Key](https://open.bigmodel.cn/)")
     st.markdown("- [Documentation](https://github.com/Ripnrip/zai-vision-suite)")
-    st.markdown("- [GitHub](https://github.com/Ripnrip/zai-vision-suite)")
+    st.markdown("- [GitHub Repo](https://github.com/Ripnrip/zai-vision-suite)")
 
-# Feature tabs
+# Main content
+st.markdown("""
+<div class="main-header">
+    <h1>🖼️ Z.ai Vision Suite</h1>
+    <p>AI-Powered Visual Intelligence powered by Zhipu AI's GLM-4V</p>
+</div>
+""", unsafe_allow_html=True)
+
+# Tabs
 tab1, tab2, tab3, tab4 = st.tabs([
-    "🔍 Image Analysis",
-    "📄 OCR (Extract Text)",
-    "🌐 Vision Search",
-    "💬 Vision Chat"
+    "🔍 Image Analysis", "📝 OCR (Extract Text)",
+    "🔎 Vision Search", "💬 Vision Chat"
 ])
 
 # Tab 1: Image Analysis
@@ -174,28 +267,27 @@ with tab1:
     col1, col2 = st.columns(2)
 
     with col1:
-        uploaded_file = st.file uploader("Upload an image", type=["jpg", "jpeg", "png", "gif", "webp"])
+        uploaded_file = st.file_uploader("Upload an image", type=["jpg", "jpeg", "png", "gif", "webp"])
 
         if uploaded_file:
-            st.image(uploaded_file)
+            st.image(uploaded_file, caption="Uploaded Image")
 
-        detail = st.select_slider("Detail Level", ["low", "high", "auto"], value="high")
-        detect_objects = st.checkbox("Detect Objects", value=True)
+        detail = st.radio("Detail Level", ["high", "low", "auto"], horizontal=True)
 
-    with col2:
-        if st.button("🔍 Analyze Image", type="primary", use_container_width=True):
+        if st.button("Analyze Image", type="primary"):
             if uploaded_file:
                 with st.spinner("Analyzing..."):
                     image_base64 = encode_image(uploaded_file)
-                    result = simulate_api_call("analyze", image_base64, detail=detail, detect_objects=detect_objects)
+                    scene, tokens = analyze_image(image_base64, detail, st.session_state.api_key)
+                    st.markdown(f"### Scene Description")
+                    st.markdown(scene)
+                    st.caption(tokens)
 
-                    st.markdown("### Scene Description")
-                    st.markdown(result["scene"])
-
-                    st.markdown("### Objects")
-                    st.markdown(result["objects"])
-            else:
-                st.warning("Please upload an image first")
+    with col2:
+        if uploaded_file and st.session_state.api_key:
+            st.info("👆 Upload an image and click Analyze to get AI-powered insights")
+        else:
+            st.info("👆 Upload an image to test (Demo Mode)")
 
 # Tab 2: OCR
 with tab2:
@@ -207,29 +299,27 @@ with tab2:
         ocr_file = st.file_uploader("Upload an image", type=["jpg", "jpeg", "png", "gif", "webp"])
 
         if ocr_file:
-            st.image(ocr_file)
+            st.image(ocr_file, caption="Uploaded Image")
 
-        language = st.selectbox("Language", ["auto", "english", "chinese", "spanish", "french", "german", "japanese"], index=0)
-        preserve_format = st.checkbox("Preserve Formatting", value=True)
+        language = st.selectbox(
+            "Language",
+            ["auto", "english", "chinese", "spanish", "french", "german", "japanese"]
+        )
 
-    with col2:
-        if st.button("📄 Extract Text", type="primary", use_container_width=True):
+        if st.button("Extract Text", type="primary"):
             if ocr_file:
                 with st.spinner("Extracting text..."):
                     image_base64 = encode_image(ocr_file)
-                    result = simulate_api_call("ocr", image_base64, language=language, preserve_format=preserve_format)
+                    text = extract_text(image_base64, language, st.session_state.api_key)
+                    st.markdown(f"### Extracted Text")
+                    st.markdown(text)
 
-                    st.markdown("### Extracted Text")
-                    st.text_area("Extracted text", result["text"], height=300)
-
-                    st.download_button(
-                        "Download Text",
-                        result["text"],
-                        "extracted_text.txt",
-                        mime="text/plain"
-                    )
+    with col2:
+        if ocr_file:
+            if st.session_state.api_key:
+                st.success("👆 Upload an image with text to extract")
             else:
-                st.warning("Please upload an image first")
+                st.info("👆 Upload an image to test (Demo Mode)")
 
 # Tab 3: Vision Search
 with tab3:
@@ -241,25 +331,19 @@ with tab3:
         search_file = st.file_uploader("Upload an image", type=["jpg", "jpeg", "png", "gif", "webp"])
 
         if search_file:
-            st.image(search_file)
+            st.image(search_file, caption="Uploaded Image")
 
         search_type = st.radio("Search Type", ["web", "products", "similar"], horizontal=True)
-        max_results = st.slider("Max Results", 1, 20, 5)
 
-    with col2:
-        if st.button("🌐 Search", type="primary", use_container_width=True):
+        if st.button("Search", type="primary"):
             if search_file:
-                with st.spinner("Searching..."):
+                with st.spinner("Generating search query..."):
                     image_base64 = encode_image(search_file)
-                    result = simulate_api_call("search", image_base64, search_type=search_type, max_results=max_results)
-
-                    st.markdown("### Search Query")
-                    st.info(result["query"])
-
-                    st.markdown("### Results")
-                    st.markdown(result["results"])
-            else:
-                st.warning("Please upload an image first")
+                    query, results = vision_search(image_base64, search_type, st.session_state.api_key)
+                    st.markdown(f"### Generated Query")
+                    st.markdown(query)
+                    st.markdown("---")
+                    st.markdown(results)
 
 # Tab 4: Vision Chat
 with tab4:
@@ -271,53 +355,32 @@ with tab4:
         chat_file = st.file_uploader("Upload an image", type=["jpg", "jpeg", "png", "gif", "webp"])
 
         if chat_file:
-            st.image(chat_file)
+            st.image(chat_file, caption="Uploaded Image")
 
         prompt = st.text_input("Your question about the image:", placeholder="What do you see in this image?")
 
         # Example prompts
         st.markdown("**Example Prompts:**")
-        if st.button("What colors are dominant?"):
-            prompt = "What colors are dominant in this image?"
-        if st.button("Describe the mood"):
-            prompt = "Describe the mood and atmosphere of this image."
+        col_a, col_b = st.columns(2)
+        with col_a:
+            if st.button("What colors are dominant?"):
+                prompt = "What colors are dominant in this image?"
+        with col_b:
+            if st.button("Describe the mood"):
+                prompt = "Describe the mood and atmosphere of this image."
+
+        if st.button("Ask", type="primary"):
+            if chat_file and prompt:
+                with st.spinner("Thinking..."):
+                    image_base64 = encode_image(chat_file)
+                    response, tokens = vision_chat(image_base64, prompt, st.session_state.api_key)
+                    st.markdown(f"### AI Response")
+                    st.markdown(response)
+                    st.caption(tokens)
 
     with col2:
-        if st.button("💬 Ask", type="primary", use_container_width=True):
-            if chat_file and prompt:
-                with st.spinner("Processing..."):
-                    image_base64 = encode_image(chat_file)
-                    result = simulate_api_call("chat", image_base64, prompt=prompt)
-
-                    st.markdown("### AI Response")
-                    st.markdown(result["response"])
-
-                    if "usage" in result:
-                        st.caption(result["usage"])
+        if chat_file:
+            if st.session_state.api_key:
+                st.success("👆 Upload an image and ask questions")
             else:
-                if not chat_file:
-                    st.warning("Please upload an image first")
-                elif not prompt:
-                    st.warning("Please enter a question")
-
-# Footer
-st.markdown("---")
-st.markdown("### 📦 Installation")
-
-st.markdown("**Install dependencies:**")
-st.code("""
-pip install -r webapp/requirements.txt
-""")
-
-st.markdown("**Run Gradio app:**")
-st.code("""
-python webapp/app.py
-""")
-
-st.markdown("**Run Streamlit app:**")
-st.code("""
-streamlit run webapp/app_streamlit.py
-""")
-
-st.markdown("---")
-st.markdown("Made with ❤️ by Z.ai Vision Suite")
+                st.info("👆 Upload an image to test (Demo Mode)")
