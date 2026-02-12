@@ -268,7 +268,7 @@ with tab4:
     col1, col2 = st.columns(2)
 
     with col1:
-        chat_file = st.file_uploader("Upload an image", type=["jpg", "jpeg", "png",gif", "webp"])
+        chat_file = st.file_uploader("Upload an image", type=["jpg", "jpeg", "png", "gif", "webp"])
 
         if chat_file:
             st.image(chat_file)

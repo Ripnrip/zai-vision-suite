@@ -42,6 +42,29 @@ interface ChatResponse {
   };
 }
 
+interface ApiResponse {
+  id: string;
+  created: number;
+  model: string;
+  choices: Array<{
+    index: number;
+    message: {
+      role: string;
+      content: string;
+    };
+    finish_reason: string;
+  }>;
+  usage?: {
+    prompt_tokens: number;
+    completion_tokens: number;
+    total_tokens: number;
+  };
+  error?: {
+    code?: number;
+    message?: string;
+  };
+}
+
 export class ZaiVisionClient {
   protected apiKey: string;
   protected baseUrl: string;
@@ -89,7 +112,7 @@ export class ZaiVisionClient {
           signal: AbortSignal.timeout(ZAI_TIMEOUT_MS),
         });
 
-        const data = await response.json();
+        const data = await response.json() as ApiResponse;
 
         if (!response.ok) {
           // Handle rate limiting
@@ -119,7 +142,7 @@ export class ZaiVisionClient {
           console.log('[ZaiVision] Response:', JSON.stringify(data, null, 2));
         }
 
-        return data;
+        return data as ChatResponse;
       } catch (error) {
         lastError = error as Error;
 
@@ -374,10 +397,10 @@ export class ZaiVisionClient {
       signal: AbortSignal.timeout(ZAI_TIMEOUT_MS),
     });
 
-    const data: ChatResponse = await response.json();
+    const data = await response.json() as ApiResponse;
 
     if (!response.ok) {
-      throw createErrorFromResponse(data);
+      throw createErrorFromResponse(data as ApiResponse);
     }
 
     return {

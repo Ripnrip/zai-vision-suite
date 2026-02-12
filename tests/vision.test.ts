@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { ZaiVisionClient } from '../src/shared/client';
+import { ZaiVisionClient } from '../src/shared/client.js';
 
 // Mock implementation for testing
 class TestVisionClient extends ZaiVisionClient {
@@ -8,7 +8,7 @@ class TestVisionClient extends ZaiVisionClient {
   }
 
   async analyze(imagePath: string, options?: any) {
-    // Mock implementation
+    // Mock implementation matching base class return type
     return {
       scene: `Mock analysis of ${imagePath}`,
       objects: [{ label: 'test object', confidence: 0.95 }]
@@ -16,28 +16,45 @@ class TestVisionClient extends ZaiVisionClient {
   }
 
   async processVideo(videoPath: string, options?: any) {
+    // Return type must match: { summary: string; frames: Array<{ number: number; description: string; timestamp?: number }>; scenes?: Array<{ start: number; end: number; description: string }> }
     return {
       summary: `Mock processing of ${videoPath}`,
-      frames: ['Frame 1', 'Frame 2', 'Frame 3']
+      frames: [
+        { number: 1, description: 'Frame 1', timestamp: 0 },
+        { number: 2, description: 'Frame 2', timestamp: 1 },
+        { number: 3, description: 'Frame 3', timestamp: 2 }
+      ],
+      scenes: [
+        { start: 0, end: 3, description: 'Mock scene' }
+      ]
     };
   }
 
   async extractText(imagePath: string, options?: any) {
     return {
       text: `Mock OCR result from ${imagePath}`,
-      language: 'en'
+      language: 'en',
+      confidence: 0.95
     };
   }
 
   async visionSearch(imagePath: string, options?: any) {
+    // Return type must match: { query: string; results: Array<{ title: string; url?: string; description?: string; similarity?: number }> }
     return {
-      results: ['Result 1', 'Result 2']
+      query: 'Mock search query',
+      results: [
+        { title: 'Result 1', description: 'First result' },
+        { title: 'Result 2', description: 'Second result' }
+      ]
     };
   }
 
   async visionWebSearch(imagePath: string, options?: any) {
+    // Return type must match: { analysis: string; suggestions: string[]; relatedTopics?: string[] }
     return {
-      results: ['Enhanced result 1', 'Enhanced result 2']
+      analysis: `Mock analysis of ${imagePath}`,
+      suggestions: ['Suggestion 1', 'Suggestion 2'],
+      relatedTopics: ['Topic 1', 'Topic 2']
     };
   }
 }
@@ -64,6 +81,8 @@ describe('Z.ai Vision Suite', () => {
 
       expect(result.summary).toContain('Mock processing');
       expect(result.frames).toHaveLength(3);
+      expect(result.frames[0]).toHaveProperty('number');
+      expect(result.frames[0]).toHaveProperty('description');
     });
   });
 
@@ -74,6 +93,7 @@ describe('Z.ai Vision Suite', () => {
 
       expect(result.text).toContain('Mock OCR');
       expect(result.language).toBe('en');
+      expect(result.confidence).toBe(0.95);
     });
   });
 
@@ -82,8 +102,9 @@ describe('Z.ai Vision Suite', () => {
       const client = new TestVisionClient();
       const result = await client.visionSearch('test-image.jpg', { searchType: 'web' });
 
+      expect(result.query).toBeDefined();
       expect(result.results).toBeInstanceOf(Array);
-      expect(result.results[0]).toBeDefined();
+      expect(result.results[0]).toHaveProperty('title');
     });
   });
 
@@ -92,8 +113,9 @@ describe('Z.ai Vision Suite', () => {
       const client = new TestVisionClient();
       const result = await client.visionWebSearch('test-image.jpg', { queryType: 'information' });
 
-      expect(result.results).toBeInstanceOf(Array);
-      expect(result.results[0]).toBeDefined();
+      expect(result.analysis).toContain('Mock analysis');
+      expect(result.suggestions).toBeInstanceOf(Array);
+      expect(result.relatedTopics).toBeInstanceOf(Array);
     });
   });
 });
