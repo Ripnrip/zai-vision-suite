@@ -14,7 +14,7 @@ import requests
 
 # Configuration
 API_URL = os.environ.get("ZAI_BASE_URL", "https://open.bigmodel.cn/api/paas/v4")
-MODEL = os.environ.get("ZAI_MODEL_VISION", "glm-4v")
+MODEL = os.environ.get("ZAI_MODEL_VISION", "glm-4.6v")
 
 
 def encode_image(img_path):
