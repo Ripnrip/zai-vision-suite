@@ -447,37 +447,38 @@ with gr.Blocks(
 
 
 if __name__ == "__main__":
-    import uvicorn
-
     # Check for API key and show warning if not set
     if not os.environ.get('ZAI_API_KEY'):
         print("⚠️  WARNING: ZAI_API_KEY not set in environment.")
         print("Users can enter their API key via the web UI.")
         print("")
 
-    # Get port from environment (for Hugging Face Spaces compatibility)
-    server_port = int(os.environ.get('GRADIO_SERVER_PORT', os.environ.get('PORT', 7860)))
-    server_name = os.environ.get('GRADIO_SERVER_NAME', '0.0.0.0')
+    # Check if running on Hugging Face Spaces
+    is_spaces = os.environ.get('SPACE_ID') is not None
 
-    # Launch Gradio app
-    app.launch(
-        server_name=server_name,
-        server_port=server_port,
-        share=False,
-        show_error=True,
-        quiet=False,
-        theme=gr.themes.Soft(),
-        css="""
-        .gradio-container {
-            max-width: 1400px !important;
-        }
-        .header {
-            text-align: center;
-            padding: 20px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border-radius: 10px;
-            margin-bottom: 20px;
-        }
-        """
-    )
+    if is_spaces:
+        # Hugging Face Spaces - let them handle the server config
+        app.launch()
+    else:
+        # Local development - use custom config
+        app.launch(
+            server_name="0.0.0.0",
+            server_port=7860,
+            share=False,
+            show_error=True,
+            quiet=False,
+            theme=gr.themes.Soft(),
+            css="""
+            .gradio-container {
+                max-width: 1400px !important;
+            }
+            .header {
+                text-align: center;
+                padding: 20px;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                border-radius: 10px;
+                margin-bottom: 20px;
+            }
+            """
+        )
