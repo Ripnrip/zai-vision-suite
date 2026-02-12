@@ -10,8 +10,17 @@
     "watch": "tsc --watch",
     "lint": "eslint src --ext .ts",
     "test": "vitest",
+    "test:run": "vitest run",
     "package:all": "pnpm run --filter '{\"packages/*\"}' --package-manager=pnpm",
     "postinstall": "echo '📦 Z.ai Vision Suite installed! Run setup to configure your platforms.' && sleep 1"
+  },
+  "bin": {
+    "analyze-image": "./cli/analyze-image.js",
+    "process-video": "./cli/process-video.js",
+    "extract-text": "./cli/extract-text.js",
+    "vision-search": "./cli/vision-search.js",
+    "vision-web-search": "./cli/vision-web-search.js",
+    "vision-chat": "./cli/vision-chat.js"
   },
   "keywords": [
     "vision",
@@ -23,9 +32,13 @@
     "OCR",
     "claude",
     "cursor",
-    "jetbrains"
+    "jetbrains",
+    "ai",
+    "cli",
+    "image-analysis",
+    "video-analysis"
   ],
-  "author": "Your Name",
+  "author": "Z.ai",
   "license": "MIT",
   "devDependencies": {
     "@types/node": "^22.19.11",
