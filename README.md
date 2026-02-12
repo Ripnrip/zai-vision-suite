@@ -299,8 +299,8 @@ npm run test:watch
 | Variable | Description | Default |
 |----------|-------------|---------|
 | `ZAI_API_KEY` | Your Zhipu AI API key | *required* |
-| `ZAI_BASE_URL` | API base URL | `https://open.bigmodel.cn/api/paas/v4` |
-| `ZAI_MODEL_VISION` | Model name | `glm-4v` |
+| `ZAI_BASE_URL` | API base URL | `https://api.z.ai/api/paas/v4` |
+| `ZAI_MODEL_VISION` | Model name | `glm-4.6v` |
 | `ZAI_MAX_RETRIES` | Max retry attempts | `3` |
 | `ZAI_TIMEOUT_MS` | Request timeout | `60000` |
 | `ZAI_DEBUG` | Enable debug logging | `false` |
