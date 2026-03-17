@@ -1,70 +1,105 @@
-# 🌸 Zai Vision Suite
-
 <div align="center">
-  <img src="https://raw.githubusercontent.com/Ripnrip/zai-vision-suite/main/public/projects/project-3.png" width="800" alt="Project Banner" style="border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
-  
-  <h3>Multi-platform AI vision suite utilizing GLM-4.6V</h3>
 
-  <p align="center">
-    <img src="https://img.shields.io/badge/Status-Active-87CEEB?style=for-the-badge&logoColor=white" alt="Status">
-    <img src="https://img.shields.io/badge/Language-Swift/React/Flutter-FFB6C1?style=for-the-badge&logoColor=white" alt="Tech">
-    <img src="https://img.shields.io/badge/License-MIT-E6E6FA?style=for-the-badge&logoColor=white" alt="License">
-  </p>
+# Zai Vision Suite
+
+### Multi-Platform AI Computer Vision
+
+<img src="docs/images/zai-vision-suite-ghibli.png" width="800" alt="Zai Vision Suite — A Ghibli-style illustration of an enchanted workshop with an owl spirit" style="border-radius: 16px;">
+
+<br />
+
+[![Python](https://img.shields.io/badge/Python-3.11+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
+[![GLM-4V](https://img.shields.io/badge/GLM--4V-Vision_Model-FF6B35?style=for-the-badge)](https://github.com/THUDM/GLM-4)
+[![React](https://img.shields.io/badge/React-Frontend-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev)
+[![Computer Vision](https://img.shields.io/badge/Computer_Vision-AI%2FML-9E7AFF?style=for-the-badge)](https://en.wikipedia.org/wiki/Computer_vision)
+
+*An advanced multi-platform AI vision suite that leverages the GLM-4V model for visual understanding, image analysis, and multimodal reasoning. From object detection to scene description, Zai makes computer vision accessible through an elegant interface.*
+
 </div>
 
 ---
 
-### 🌿 Overview
+## Overview
 
-[Detailed description of the project, its purpose, and the problem it solves. Use warm, professional language.]
+Zai Vision Suite is a full-stack application that democratizes access to cutting-edge computer vision capabilities. Built around the GLM-4V (General Language Model with Vision) architecture, it provides a clean, intuitive interface for performing complex visual AI tasks — image analysis, object detection, OCR, scene understanding, and multimodal Q&A.
 
-### ✨ Key Features
+The suite is designed for both developers exploring vision AI and end-users who need practical visual analysis tools without the complexity of managing ML infrastructure.
 
-- 🎨 **Aesthetic Design**: Studio Ghibli inspired visual language and smooth interactions.
-- 🚀 **Performance Focused**: Optimized for speed and responsiveness across all devices.
-- 🧠 **AI Integration**: Powered by advanced LLMs and agentic workflows (if applicable).
-- 📱 **Seamless Experience**: Context-aware UI that adapts to user needs perfectly.
+## Key Features
 
-### 🛠️ Tech Stack
+**GLM-4V Integration** — Deep integration with the GLM-4V model for state-of-the-art visual understanding, supporting image-to-text, visual Q&A, and scene analysis.
 
-- **Frontend**: [React / Next.js / SwiftUI / Flutter]
-- **Styling**: [Vanilla CSS / Tailwind / Framer Motion]
-- **Backend/AI**: [Replicate / OpenAI / Cerebras]
-- **Infrastructure**: [Vercel / GitHub Actions]
+**Multi-Modal Reasoning** — Combine text prompts with images for nuanced analysis. Ask questions about images and receive contextual, detailed responses.
 
-### 📸 Explore the Journey
+**Real-Time Processing** — Stream results as they're generated for immediate feedback on large or complex images.
 
-> ["A heart's a heavy burden." — Sophie, Howl's Moving Castle]
+**Cross-Platform UI** — React-based frontend that works across desktop and mobile browsers with drag-and-drop image upload.
 
-<div align="center">
-  <table>
-    <tr>
-      <td width="50%">
-        <img src="[Link to screenshot 1]" width="100%" alt="Dashboard" style="border-radius: 10px;">
-      </td>
-      <td width="50%">
-        <img src="[Link to screenshot 2]" width="100%" alt="Feature Detail" style="border-radius: 10px;">
-      </td>
-    </tr>
-  </table>
-</div>
+**Extensible Pipeline** — Modular architecture allows plugging in additional vision models (YOLO, SAM, CLIP) alongside GLM-4V.
 
-### 🚀 Getting Started
+## Tech Stack
 
-```bash
-# Clone the magic
-git clone https://github.com/Ripnrip/zai-vision-suite.git
+| Layer | Technology |
+|-------|-----------|
+| **Vision Model** | GLM-4V (ZhipuAI) |
+| **Backend** | Python, FastAPI, Pydantic |
+| **Frontend** | React, Tailwind CSS |
+| **ML Infra** | PyTorch, Transformers, ONNX |
+| **API Layer** | RESTful + WebSocket streaming |
 
-# Step into the world
-cd zai-vision-suite
+## Architecture
 
-# Bring it to life
-npm install && npm start
+```
+zai-vision-suite/
+├── api/                  # FastAPI backend
+│   ├── routes/           # Vision task endpoints
+│   ├── models/           # ML model loaders
+│   └── processing/       # Image preprocessing pipeline
+├── frontend/             # React application
+│   ├── components/       # Upload, analysis, results UI
+│   └── hooks/            # API integration hooks
+├── models/               # Model configs & weights
+└── scripts/              # Training & evaluation tools
 ```
 
+## Getting Started
+
+```bash
+# Clone the repository
+git clone https://github.com/Ripnrip/zai-vision-suite.git
+cd zai-vision-suite
+
+# Set up Python environment
+python -m venv venv && source venv/bin/activate
+pip install -r requirements.txt
+
+# Configure API keys
+cp .env.example .env
+# Add your ZhipuAI API key to .env
+
+# Start the backend
+uvicorn api.main:app --reload
+
+# In a new terminal, start the frontend
+cd frontend && npm install && npm run dev
+```
+
+## Use Cases
+
+**Content Moderation** — Analyze uploaded images for policy compliance with detailed visual reports.
+
+**Accessibility** — Generate alt-text descriptions for images, improving web accessibility at scale.
+
+**Document Analysis** — Extract text, tables, and structured data from photographs of documents.
+
+**Creative Analysis** — Describe artistic style, composition, and color palette of visual works.
+
 ---
 
 <div align="center">
-  <p>Built with ✨ by <a href="https://guriboycodes.com">Guriboy</a></p>
-  <img src="https://guriboycodes.com/me_ghibli.png" width="100" style="border-radius: 50%;">
+  <br />
+  <p>Built with ✨ by <a href="https://guriboycodes.com"><strong>GuriboyCodes</strong></a></p>
+  <sub>Staff Software Engineer — Mobile & AI</sub>
+  <br /><br />
+  <a href="https://guriboycodes.com">Portfolio</a> · <a href="https://github.com/Ripnrip">GitHub</a> · <a href="https://linkedin.com/in/gurindersingh">LinkedIn</a>
 </div>
